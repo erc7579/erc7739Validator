@@ -1,12 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 
-import { IERC7739 } from "./IERC7739.sol";
-import { EIP712 } from "solady/utils/EIP712.sol";
-
-import "forge-std/console2.sol";
-
 /// @title ERC-7739: Nested Typed Data Sign Support for ERC-7579 Validators
+interface IERC7739 {
+    // @notice Returns magic value if this module supports ERC-7739
+    function supportsNestedTypedDataSign() external view returns (bytes32);
+}
+
+interface IERC5267 {
+    function eip712Domain() external view returns (
+        bytes1 fields,
+        string memory name,
+        string memory version,
+        uint256 chainId,
+        address verifyingContract,
+        bytes32 salt,
+        uint256[] memory extensions
+    );
+}
 
 abstract contract ERC7739Validator is IERC7739 {
     /// @dev `keccak256("PersonalSign(bytes prefixed)")`.
@@ -23,7 +34,6 @@ abstract contract ERC7739Validator is IERC7739 {
     function supportsNestedTypedDataSign() public view virtual returns (bytes32 result) {
         result = bytes4(0xd620c85a);
     }
-
 
     /*//////////////////////////////////////////////////////////////////////////
                                      INTERNAL
@@ -279,7 +289,7 @@ abstract contract ERC7739Validator is IERC7739 {
             address verifyingContract,
             bytes32 salt,
             uint256[] memory extensions
-        ) = EIP712(account).eip712Domain();
+        ) = IERC5267(account).eip712Domain();
         /// @solidity memory-safe-assembly
         assembly {
             m := mload(0x40) // Grab the free memory pointer.
@@ -308,7 +318,7 @@ abstract contract ERC7739Validator is IERC7739 {
             address verifyingContract,
             /*bytes32 salt*/,
             /*uint256[] memory extensions*/
-        ) = EIP712(account).eip712Domain();
+        ) = IERC5267(account).eip712Domain();
 
         /// @solidity memory-safe-assembly
         assembly {
