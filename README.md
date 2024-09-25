@@ -9,7 +9,7 @@ This repo introduces base contract for [ERC-7579 IValidator](https://eips.ethere
 
 ## What's Included
 - `ERC7739Validator.sol`. This is the base contract one can inherit to introduce ERC-7739 support in a validator module.
-- `SampleK1ValidatorWithERC7739.sol`. Sample validator module built using `ERC7739Validator` base. Use this as an example on how to build validator modules. NB: this module is also an [`ISessionValidator`](https://github.com/erc7579/smartsessions/wiki/Smart-Sessions#isessionvalidator) for Smart Sessions module.
+- `SampleK1ValidatorWithERC7739.sol`. Sample validator module built using `ERC7739Validator` base. Use this as an example on how to build validator modules. NB: this module is also an [`ISessionValidator`](https://github.com/erc7579/smartsessions/wiki/Smart-Sessions#isessionvalidator) for [Smart Sessions](https://github.com/erc7579/smartsessions) module.
 - `EIP5267CompatibilityFallback.sol`. An [ERC-7579 Fallback Module](https://eips.ethereum.org/EIPS/eip-7579#fallback-handlers) that adds support of EIP-5267 `eip712Domain()` interface to a smart account. This interface is required by ERC-7739 flow. So the Smart Account should expose it directly or via the fallback.
 - Libs in the `utils` folder are not used by `ERC7739Validator`. They are used by `SampleK1ValidatorWithERC7739` and `EIP5267CompatibilityFallback, so they may be optional for one's usecase.
 
