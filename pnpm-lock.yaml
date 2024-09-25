@@ -11,9 +11,9 @@ importers:
       '@rhinestone/modulekit':
         specifier: ^0.4.8
         version: 0.4.8(ethers@5.7.2)(hardhat@2.22.6(typescript@4.9.5))(lodash@4.17.21)(typechain@5.2.0(typescript@4.9.5))(typescript@4.9.5)
-      parallelshell:
-        specifier: ^3.0.2
-        version: 3.0.2
+      enumerablemap:
+        specifier: https://github.com/erc7579/enumerablemap
+        version: https://codeload.github.com/erc7579/enumerablemap/tar.gz/19601b893043a92facd413fa249ea23734523be2
       stringutils:
         specifier: github:Arachnid/solidity-stringutils
         version: solidity-stringutils@https://codeload.github.com/Arachnid/solidity-stringutils/tar.gz/4b2fcc43fa0426e19ce88b1f1ec16f5903a2e461
@@ -796,6 +796,10 @@ packages:
     resolution: {integrity: sha512-rRqJg/6gd538VHvR3PSrdRBb/1Vy2YfzHqzvbhGIQpDRKIa4FgV/54b5Q1xYSxOOwKvjXweS26E0Q+nAMwp2pQ==}
     engines: {node: '>=8.6'}
 
+  enumerablemap@https://codeload.github.com/erc7579/enumerablemap/tar.gz/19601b893043a92facd413fa249ea23734523be2:
+    resolution: {tarball: https://codeload.github.com/erc7579/enumerablemap/tar.gz/19601b893043a92facd413fa249ea23734523be2}
+    version: 0.0.0
+
   env-paths@2.2.1:
     resolution: {integrity: sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==}
     engines: {node: '>=6'}
@@ -1475,10 +1479,6 @@ packages:
   package-json@8.1.1:
     resolution: {integrity: sha512-cbH9IAIJHNj9uXi196JVsRlt7cHKak6u/e6AkL/bkRelZ7rlL3X1YKxsZwa36xipOEKAsdtmaG6aAJoM1fx2zA==}
     engines: {node: '>=14.16'}
-
-  parallelshell@3.0.2:
-    resolution: {integrity: sha512-aW73W8tmYiFZtQi41pweV3WWT6o/EvSxAVQHbumOhN53H47OuWQwrRc11xQ2i44GFvR5AjtzhD92r8Kv9X+7Iw==}
-    hasBin: true
 
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
@@ -3106,6 +3106,8 @@ snapshots:
       ansi-colors: 4.1.3
       strip-ansi: 6.0.1
 
+  enumerablemap@https://codeload.github.com/erc7579/enumerablemap/tar.gz/19601b893043a92facd413fa249ea23734523be2: {}
+
   env-paths@2.2.1: {}
 
   erc7579-implementation@https://codeload.github.com/erc7579/erc7579-implementation/tar.gz/b3f8bcb2df3aae3217213ffa8b7a87c1eb42ec56(ethers@5.7.2)(hardhat@2.22.6(typescript@4.9.5))(lodash@4.17.21)(typechain@5.2.0(typescript@4.9.5)):
@@ -3938,8 +3940,6 @@ snapshots:
       registry-auth-token: 5.0.2
       registry-url: 6.0.1
       semver: 7.6.3
-
-  parallelshell@3.0.2: {}
 
   parent-module@1.0.1:
     dependencies:

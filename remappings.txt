@@ -20,3 +20,4 @@ solarray/=node_modules/solarray/src/
 kernel/=node_modules/@zerodev/kernel/src/
 ExcessivelySafeCall/=node_modules/excessively-safe-call/src/
 stringutils/=node_modules/stringutils/src/
+enumerableset4337/=node_modules/enumerablemap/src/

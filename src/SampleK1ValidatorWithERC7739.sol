@@ -5,7 +5,7 @@ import { ERC7739Validator } from "./ERC7739Validator.sol";
 import { SignatureCheckerLib } from "solady/utils/SignatureCheckerLib.sol";
 import { ERC7579ValidatorBase } from "modulekit/Modules.sol";
 import { PackedUserOperation } from "modulekit/external/ERC4337.sol";
-import { EnumerableSet } from "./utils/EnumerableSet4337.sol";
+import { EnumerableSet } from "enumerableset4337/EnumerableSet4337.sol";
 import { ModuleInstallLib } from "./utils/ModuleInstallLib.sol";
 import { MessageHashUtils } from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
