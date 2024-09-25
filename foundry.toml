@@ -8,7 +8,7 @@ fs_permissions = [{ access = "read", path = "out-optimized" }, { access = "read-
 allow_paths = ["*", "/"]
 
 [rpc_endpoints]
-mainnet = "${MAINNET_RPC_URL}" 
+localhost = "http://localhost:8545"
 
 [fmt]
 bracket_spacing = true

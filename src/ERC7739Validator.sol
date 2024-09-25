@@ -4,6 +4,8 @@ pragma solidity ^0.8.27;
 import { IERC7739 } from "./IERC7739.sol";
 import { EIP712 } from "solady/utils/EIP712.sol";
 
+import "forge-std/console2.sol";
+
 /// @title ERC-7739: Nested Typed Data Sign Support for ERC-7579 Validators
 
 abstract contract ERC7739Validator is IERC7739 {

@@ -199,7 +199,6 @@ contract SampleK1ValidatorWithERC7739 is ERC7579ValidatorBase, ERC7739Validator 
     function _erc1271CallerIsSafe(address sender) internal view virtual override returns (bool) {
         return ( 
                     sender == 0x000000000000D9ECebf3C23529de49815Dac1c4c || // MulticallerWithSigner
-                    sender == msg.sender || // Smart Account. Assume smart account never sends non safe eip-712 struct
                     safeSenders.contains(msg.sender, sender) // check if sender is in safeSenders for the Smart Account
                 );
     }

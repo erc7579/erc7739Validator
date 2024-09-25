@@ -2,7 +2,6 @@
 pragma solidity ^0.8.23;
 
 import { Test } from "forge-std/Test.sol";
-import "forge-std/console2.sol";
 import {
     RhinestoneModuleKit,
     ModuleKitHelpers,
@@ -15,8 +14,9 @@ import { SampleK1ValidatorWithERC7739 } from "src/SampleK1ValidatorWithERC7739.s
 import { EIP5267CompatibilityFallback } from "src/EIP5267CompatibilityFallback.sol";
 import { ModuleInstallLib } from "src/utils/ModuleInstallLib.sol";
 import { EIP712 } from "solady/utils/EIP712.sol";
+import { IERC7579Account } from "erc7579/interfaces/IERC7579Account.sol";
 
-contract SampleK1ValidatorWithERC7739Test is RhinestoneModuleKit, Test {
+contract SampleERC7739ValidatorTest is RhinestoneModuleKit, Test {
     using ModuleKitHelpers for *;
     using ModuleKitUserOp for *;
     using ModuleInstallLib for bytes;
@@ -27,11 +27,7 @@ contract SampleK1ValidatorWithERC7739Test is RhinestoneModuleKit, Test {
     AccountInstance internal instance;
     SampleK1ValidatorWithERC7739 internal validator;
     EIP5267CompatibilityFallback internal fallbackModule;
-
     Account owner;
-
-    // test 1271 validation from regulat sender, from safe sender and RPC call?
-    // https://book.getfoundry.sh/cheatcodes/rpc
 
     function setUp() public {
         init();
@@ -39,13 +35,11 @@ contract SampleK1ValidatorWithERC7739Test is RhinestoneModuleKit, Test {
         // Create the validator
         validator = new SampleK1ValidatorWithERC7739();
         vm.label(address(validator), "SampleK1ValidatorWithERC7739");
-
+        owner = makeAccount("owner");
         fallbackModule = new EIP5267CompatibilityFallback();
 
-        owner = makeAccount("owner");
-
         // Create the account and install the validator
-        instance = makeAccountInstance("Sample7739Validator");
+        instance = makeAccountInstance("Smart Account");
         vm.deal(address(instance.account), 10 ether);
         instance.installModule({
             moduleTypeId: MODULE_TYPE_VALIDATOR,
@@ -86,22 +80,34 @@ contract SampleK1ValidatorWithERC7739Test is RhinestoneModuleKit, Test {
     }
 
     /// @notice Tests the validation of an EIP-712 signature via safe sender.
-    function test_isValidSignature_Vanilla1271_TypedData_SafeSender() public {
-        
+    function test_isValidSignature_Vanilla1271_TypedData_SafeSender_Success() public {
         // add safe sender
+        vm.prank(instance.account);
+        validator.addSafeSender(address(this));
 
         TestTemps memory t;
-        t.contents = keccak256("0x1234");
-        bytes32 dataToSign = toERC1271Hash(t.contents, instance.account);
+        bytes32 dataToSign = hashTypedDataSecure(Mail({from: address(1), to: address(2), contents: "Moo!"}), instance.account);
         (t.v, t.r, t.s) = vm.sign(owner.key, dataToSign);
-        bytes memory contentsType = "Contents(bytes32 stuff)";
-        bytes memory signature = abi.encodePacked(t.r, t.s, t.v, APP_DOMAIN_SEPARATOR, t.contents, contentsType, uint16(contentsType.length));
-        
-        vm.prank(instance.account);
-        bytes4 res = validator.isValidSignatureWithSender(address(this), toContentsHash(t.contents), signature);
+        bytes memory signature = abi.encodePacked(address(validator), t.r, t.s, t.v);
+
+        bytes4 res = IERC7579Account(instance.account).isValidSignature(dataToSign, signature);
         assertEq(res, bytes4(0x1626ba7e));
     }
 
+
+    /// @notice The validation of a vanilla EIP-712/ERC-1271 signature doesn't pass if the sender is not safe
+    function test_isValidSignature_Vanilla1271_TypedData_Fails() public {
+        // do not add safe sender
+        TestTemps memory t;
+        bytes32 dataToSign = hashTypedDataSecure(Mail({from: address(1), to: address(2), contents: "Moo!"}), instance.account);
+        (t.v, t.r, t.s) = vm.sign(owner.key, dataToSign);
+        bytes memory signature = abi.encodePacked(address(validator), t.r, t.s, t.v);
+
+        // for basic account it reverts, as it doesn't wrap validator.isValidSignatureWithSender with try/catch
+        // for Nexus, it would return 0xffffffff as Nexus does try/catch
+        vm.expectRevert();
+        bytes4 res = IERC7579Account(instance.account).isValidSignature(dataToSign, signature);
+    }
 
     // ===== HELPERS ======
 
@@ -126,6 +132,11 @@ contract SampleK1ValidatorWithERC7739Test is RhinestoneModuleKit, Test {
         uint256[] extensions;
     }
 
+    struct Mail {
+        address from;
+        address to;
+        string contents;
+    }
 
     /// @notice Generates an ERC-1271 hash for personal sign.
     /// @param childHash The child hash.
@@ -163,6 +174,22 @@ contract SampleK1ValidatorWithERC7739Test is RhinestoneModuleKit, Test {
             )
         );
         return keccak256(abi.encodePacked("\x19\x01", APP_DOMAIN_SEPARATOR, parentStructHash));
+    }
+
+    // @notice EIP-712 hash
+    function hashTypedDataSecure(Mail memory mail, address account) internal view returns (bytes32) {
+        bytes32 secureHash = keccak256(
+            abi.encode(
+                keccak256(
+                        "Mail(address from,address to,string contents,address verifyingContract)"
+                    ),
+                mail.from,
+                mail.to,
+                keccak256(bytes(mail.contents)),
+                account
+            )
+        );
+        return keccak256(abi.encodePacked("\x19\x01", APP_DOMAIN_SEPARATOR, secureHash));
     }
 
     /// @notice Generates a contents hash.
