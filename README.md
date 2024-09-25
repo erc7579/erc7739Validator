@@ -28,8 +28,8 @@ pnpm test:anvil
 ```
 This task runs `anvil` first, then `forge test` in parallel.  
 NB: it keeps anvil running in the background. So for the next tests you may use `forge test` as usual.  
-Do not forget to use `lsof -t -i tcp:8545 | xargs kill` to kill Anvil.  
-Or you can always just manually run Anvil in a separate terminal and ingore `pnpm test:anvil` script.  
+Do not forget to use `lsof -t -i tcp:8545 | xargs kill` to kill Anvil after you're done with testing.  
+Or you can always just manually run Anvil in a separate terminal and ignore `pnpm test:anvil` script.  
 
 You can rm this test if you're going to clone this repo and build a new validator in it.  
 Then you won't need to spin up anvil every time and you can just use `forge test`.  
@@ -39,7 +39,7 @@ Just inherit `ERC7739Validator` in your validator module and you're all set up.
 Smart Accounts that do not expose EIP-5267 `eip712Domain()` method must install `EIP5267CompatibilityFallback` in order to benefit from ERC-7739's improved security.  
 
 This repo is based on [Rhinestone Module Template](https://github.com/rhinestonewtf/module-template).  
-Please visit the link above if you need more instructions on how to build, test and deploy a module.
-## Contributing
+Please visit the link above if you need more instructions on how to build, test and deploy modules.
 
+## Contributing
 For feature or change requests, feel free to open a PR, start a discussion or get in touch with us.
