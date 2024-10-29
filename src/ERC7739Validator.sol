@@ -13,6 +13,7 @@ interface IERC5267 {
     );
 }
 
+/// @title ERC-7739: Nested Typed Data Sign Support for ERC-7579 Validators
 abstract contract ERC7739Validator {
     /// @dev `keccak256("PersonalSign(bytes prefixed)")`.
     bytes32 internal constant _PERSONAL_SIGN_TYPEHASH = 0x983e65e5148e570cd828ead231ee759a8d7958721a768f93bc4483ba005c32de;
