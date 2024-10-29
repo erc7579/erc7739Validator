@@ -136,23 +136,7 @@ contract SampleK1ValidatorWithERC7739 is ERC7579ValidatorBase, ERC7739Validator 
         override
         returns (bytes4)
     {   
-        // new detection logic
-        if(_isDetectionRequest(hash, signature)) {
-            return SUPPORTS_ERC7739;
-        }
-
-        // can put additional checks based on sender here
-        
-        // check if sig is valid
-        bool success = _erc1271IsValidSignatureWithSender(sender, hash, _erc1271UnwrapSignature(signature));
-        /// @solidity memory-safe-assembly
-        bytes4 sigValidationResult;
-        assembly {
-            // `success ? bytes4(keccak256("isValidSignature(bytes32,bytes)")) : 0xffffffff`.
-            // We use `0xffffffff` for invalid, in convention with the reference implementation.
-            sigValidationResult := shl(224, or(0x1626ba7e, sub(0, iszero(success))))
-        }
-        return sigValidationResult;
+        return _erc1271IsValidSignatureWithSender(sender, hash, signature);
     }
 
     /// @notice ISessionValidator interface for smart session

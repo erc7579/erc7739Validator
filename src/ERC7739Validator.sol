@@ -23,27 +23,34 @@ abstract contract ERC7739Validator {
                                      INTERNAL
     //////////////////////////////////////////////////////////////////////////*/
 
-    function _isDetectionRequest(bytes32 hash, bytes calldata signature) internal view returns (bool res) {
-        unchecked {
-            if (signature.length == uint256(0)) {
-                // Forces the compiler to optimize for smaller bytecode size.
-                if (uint256(hash) == ~signature.length / 0xffff * 0x7739) 
-                    res = true;
-            }
-        }
-    }
-
     /// @dev Returns whether the `signature` is valid for the `hash.
     /// Use this in your validator's `isValidSignatureWithSender` implementation.
     function _erc1271IsValidSignatureWithSender(address sender, bytes32 hash, bytes calldata signature)
         internal
         view
         virtual
-        returns (bool)
-    {
-        return _erc1271IsValidSignatureViaSafeCaller(sender, hash, signature)
+        returns (bytes4)
+    {   
+        // detection request
+        unchecked {
+            if (signature.length == uint256(0)) {
+                // Forces the compiler to optimize for smaller bytecode size.
+                if (uint256(hash) == ~signature.length / 0xffff * 0x7739) 
+                    return SUPPORTS_ERC7739;
+            }
+        }
+
+        bool success = _erc1271IsValidSignatureViaSafeCaller(sender, hash, signature)
             || _erc1271IsValidSignatureViaNestedEIP712(hash, signature)
             || _erc1271IsValidSignatureViaRPC(hash, signature);
+
+        bytes4 sigValidationResult;
+        assembly {
+            // `success ? bytes4(keccak256("isValidSignature(bytes32,bytes)")) : 0xffffffff`.
+            // We use `0xffffffff` for invalid, in convention with the reference implementation.
+            sigValidationResult := shl(224, or(0x1626ba7e, sub(0, iszero(success))))
+        }
+        return sigValidationResult;
     }
 
     /// @dev Returns whether the `msg.sender` is considered safe, such
