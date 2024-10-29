@@ -166,7 +166,7 @@ contract SampleERC7739ValidatorTest is RhinestoneModuleKit, Test {
             abi.encodePacked(
                 abi.encode(
                     keccak256(
-                        "TypedDataSign(Contents contents,bytes1 fields,string name,string version,uint256 chainId,address verifyingContract,bytes32 salt,uint256[] extensions)Contents(bytes32 stuff)"
+                        "TypedDataSign(Contents contents,string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)Contents(bytes32 stuff)"
                     ),
                     contents
                 ),
@@ -208,13 +208,11 @@ contract SampleERC7739ValidatorTest is RhinestoneModuleKit, Test {
 
         return
             abi.encode(
-                t.fields,
                 keccak256(bytes(t.name)),
                 keccak256(bytes(t.version)),
                 t.chainId,
                 t.verifyingContract, // Use the account address as the verifying contract.
-                t.salt,
-                keccak256(abi.encodePacked(t.extensions))
+                t.salt
             );
     }
 }
