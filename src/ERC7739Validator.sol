@@ -33,6 +33,12 @@ abstract contract ERC7739Validator {
         returns (bytes4)
     {   
         // detection request
+        // this check only takes 17 gas units
+        // in theory, it can be moved out of this function so it doesn't apply to every
+        // isValidSignatureWithSender() call, but it would require an additional standard
+        // interface for SA to check if the IValidator supports ERC-7739
+        // while isValidSignatureWithSender() is specified by ERC-7579, so
+        // it makes sense to use it in SA to check if the validator supports ERC-7739
         unchecked {
             if (signature.length == uint256(0)) {
                 // Forces the compiler to optimize for smaller bytecode size.
