@@ -1,12 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 
-/// @title ERC-7739: Nested Typed Data Sign Support for ERC-7579 Validators
-interface IERC7739 {
-    // @notice Returns magic value if this module supports ERC-7739
-    function supportsNestedTypedDataSign() external view returns (bytes32);
-}
-
 interface IERC5267 {
     function eip712Domain() external view returns (
         bytes1 fields,
@@ -19,26 +13,25 @@ interface IERC5267 {
     );
 }
 
-abstract contract ERC7739Validator is IERC7739 {
+abstract contract ERC7739Validator {
     /// @dev `keccak256("PersonalSign(bytes prefixed)")`.
     bytes32 internal constant _PERSONAL_SIGN_TYPEHASH = 0x983e65e5148e570cd828ead231ee759a8d7958721a768f93bc4483ba005c32de;
     bytes32 internal constant _DOMAIN_TYPEHASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
-
-
-    /// @dev For automatic detection that the smart account supports the nested EIP-712 workflow.
-    /// By default, it returns `bytes32(bytes4(keccak256("supportsNestedTypedDataSign()")))`,
-    /// denoting support for the default behavior, as implemented in
-    /// `_erc1271IsValidSignatureViaNestedEIP712`, which is called in `isValidSignature`.
-    /// Future extensions should return a different non-zero `result` to denote different behavior.
-    /// This method intentionally returns bytes32 to allow freedom for future extensions.
-    function supportsNestedTypedDataSign() public view virtual returns (bytes32 result) {
-        result = bytes4(0xd620c85a);
-    }
+    bytes4 internal constant SUPPORTS_ERC7739 = 0x77390001;
 
     /*//////////////////////////////////////////////////////////////////////////
                                      INTERNAL
     //////////////////////////////////////////////////////////////////////////*/
 
+    function _isDetectionRequest(bytes32 hash, bytes calldata signature) internal view returns (bool res) {
+        unchecked {
+            if (signature.length == uint256(0)) {
+                // Forces the compiler to optimize for smaller bytecode size.
+                if (uint256(hash) == ~signature.length / 0xffff * 0x7739) 
+                    res = true;
+            }
+        }
+    }
 
     /// @dev Returns whether the `signature` is valid for the `hash.
     /// Use this in your validator's `isValidSignatureWithSender` implementation.
@@ -354,6 +347,17 @@ abstract contract ERC7739Validator is IERC7739 {
             // Restore the part of the free memory slot that was overwritten.
             mstore(0x3a, 0)
         }
+    }
+
+    /// @dev Backwards compatibility stuff
+    /// For automatic detection that the smart account supports the nested EIP-712 workflow.
+    /// By default, it returns `bytes32(bytes4(keccak256("supportsNestedTypedDataSign()")))`,
+    /// denoting support for the default behavior, as implemented in
+    /// `_erc1271IsValidSignatureViaNestedEIP712`, which is called in `isValidSignature`.
+    /// Future extensions should return a different non-zero `result` to denote different behavior.
+    /// This method intentionally returns bytes32 to allow freedom for future extensions.
+    function supportsNestedTypedDataSign() public view virtual returns (bytes32 result) {
+        result = bytes4(0xd620c85a);
     }
 
 }

@@ -52,6 +52,21 @@ contract SampleERC7739ValidatorTest is RhinestoneModuleKit, Test {
         instance.installModule({ moduleTypeId: MODULE_TYPE_FALLBACK, module: address(fallbackModule), data: _fallback });
     }
 
+    /// @notice Tests the detection of ERC-7739 support
+    function test_isValidSignature_ERC7739_Detection() public {
+        vm.startPrank(instance.account);
+        bytes4 res = validator.isValidSignatureWithSender(address(this), hex'7739773977397739773977397739773977397739773977397739773977397739', "");
+        assertEq(res, bytes4(0x77390001));
+
+        // reverts if not supported
+        // it reverts as the last logic branch is RPC check, whoch reverts if it is not an RPC call
+        // for calls via Smart Account, this revert is bubbled and SA returns 0xffffffff
+        // here we call directly, so we expect a revert
+        vm.expectRevert();
+        validator.isValidSignatureWithSender(address(this), hex'1234123123123123', "");
+        vm.stopPrank();
+    }
+
     /// @notice Tests the validation of a personal signature
     function test_isValidSignature_ERC7739_PersonalSign_Success() public {
         TestTemps memory t;
