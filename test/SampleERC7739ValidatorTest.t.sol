@@ -52,6 +52,21 @@ contract SampleERC7739ValidatorTest is RhinestoneModuleKit, Test {
         instance.installModule({ moduleTypeId: MODULE_TYPE_FALLBACK, module: address(fallbackModule), data: _fallback });
     }
 
+    /// @notice Tests the detection of ERC-7739 support
+    function test_isValidSignature_ERC7739_Detection() public {
+        vm.startPrank(instance.account);
+        bytes4 res = validator.isValidSignatureWithSender(address(this), hex'7739773977397739773977397739773977397739773977397739773977397739', "");
+        assertEq(res, bytes4(0x77390001));
+
+        // reverts if not supported
+        // it reverts as the last logic branch is RPC check, whoch reverts if it is not an RPC call
+        // for calls via Smart Account, this revert is bubbled and SA returns 0xffffffff
+        // here we call directly, so we expect a revert
+        vm.expectRevert();
+        validator.isValidSignatureWithSender(address(this), hex'1234123123123123', "");
+        vm.stopPrank();
+    }
+
     /// @notice Tests the validation of a personal signature
     function test_isValidSignature_ERC7739_PersonalSign_Success() public {
         TestTemps memory t;
@@ -65,14 +80,35 @@ contract SampleERC7739ValidatorTest is RhinestoneModuleKit, Test {
         assertEq(res, bytes4(0x1626ba7e));
     }
 
-    /// @notice Tests the validation of an EIP-712 typed data signature
-    function test_isValidSignature_ERC7739_TypedData_Success() public {
+    /// @notice Tests the validation of an EIP-712 typed data signature with a nested struct
+    function test_isValidSignature_ERC7739_TypedData_Success_Explicit_Mode() public {
         TestTemps memory t;
         t.contents = keccak256("0x1234");
-        bytes32 dataToSign = toERC1271Hash(t.contents, instance.account);
+        bytes memory contentsType = "A(bytes32 stuff)Contents(A a)"; //encoded as per EIP-712
+        bytes memory contentsName = "Contents";
+        bytes memory contentsDescription = abi.encodePacked(contentsType, contentsName); //descr is contents type || contents name
+        
+        bytes32 dataToSign = toERC1271Hash(t.contents, instance.account, contentsType);
         (t.v, t.r, t.s) = vm.sign(owner.key, dataToSign);
-        bytes memory contentsType = "Contents(bytes32 stuff)";
-        bytes memory signature = abi.encodePacked(t.r, t.s, t.v, APP_DOMAIN_SEPARATOR, t.contents, contentsType, uint16(contentsType.length));
+        
+        bytes memory signature = abi.encodePacked(t.r, t.s, t.v, APP_DOMAIN_SEPARATOR, t.contents, contentsDescription, uint16(contentsDescription.length)); 
+        
+        vm.prank(instance.account);
+        bytes4 res = validator.isValidSignatureWithSender(address(this), toContentsHash(t.contents), signature);
+        assertEq(res, bytes4(0x1626ba7e));
+    }
+
+    /// @notice Tests the validation of an EIP-712 typed data signature
+    function test_isValidSignature_ERC7739_TypedData_Success_Implicit_Mode() public {
+        TestTemps memory t;
+        t.contents = keccak256("0x1234");
+        bytes memory contentsType = "Contents(bytes32 stuff)"; 
+        bytes memory contentsDescription = contentsType; //descr is just contents type
+
+        bytes32 dataToSign = toERC1271Hash(t.contents, instance.account, contentsType);
+        (t.v, t.r, t.s) = vm.sign(owner.key, dataToSign);
+        
+        bytes memory signature = abi.encodePacked(t.r, t.s, t.v, APP_DOMAIN_SEPARATOR, t.contents, contentsDescription, uint16(contentsDescription.length));
         
         vm.prank(instance.account);
         bytes4 res = validator.isValidSignatureWithSender(address(this), toContentsHash(t.contents), signature);
@@ -161,12 +197,15 @@ contract SampleERC7739ValidatorTest is RhinestoneModuleKit, Test {
     /// @param contents The contents hash.
     /// @param account The account address.
     /// @return The ERC-1271 hash.
-    function toERC1271Hash(bytes32 contents, address account) internal view returns (bytes32) {
+    function toERC1271Hash(bytes32 contents, address account, bytes memory contentsType) internal view returns (bytes32) {
         bytes32 parentStructHash = keccak256(
             abi.encodePacked(
                 abi.encode(
                     keccak256(
-                        "TypedDataSign(Contents contents,bytes1 fields,string name,string version,uint256 chainId,address verifyingContract,bytes32 salt,uint256[] extensions)Contents(bytes32 stuff)"
+                        abi.encodePacked(
+                            "TypedDataSign(Contents contents,string name,string version,uint256 chainId,address verifyingContract,bytes32 salt)",
+                            contentsType
+                        )
                     ),
                     contents
                 ),
@@ -208,13 +247,11 @@ contract SampleERC7739ValidatorTest is RhinestoneModuleKit, Test {
 
         return
             abi.encode(
-                t.fields,
                 keccak256(bytes(t.name)),
                 keccak256(bytes(t.version)),
                 t.chainId,
                 t.verifyingContract, // Use the account address as the verifying contract.
-                t.salt,
-                keccak256(abi.encodePacked(t.extensions))
+                t.salt
             );
     }
 }
