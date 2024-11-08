@@ -15,6 +15,8 @@ interface IERC5267 {
 
 /// @title ERC-7739: Nested Typed Data Sign Support for ERC-7579 Validators
 abstract contract ERC7739Validator {
+    error InvalidSignature();
+    
     /// @dev `keccak256("PersonalSign(bytes prefixed)")`.
     bytes32 internal constant _PERSONAL_SIGN_TYPEHASH = 0x983e65e5148e570cd828ead231ee759a8d7958721a768f93bc4483ba005c32de;
     bytes32 internal constant _DOMAIN_TYPEHASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
@@ -54,7 +56,7 @@ abstract contract ERC7739Validator {
             s := calldataload(add(signature.offset, 0x20))
         }
         if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
-            return 0xffffffff;
+            revert InvalidSignature();
         }
 
         bool success = _erc1271IsValidSignatureViaSafeCaller(sender, hash, signature)
