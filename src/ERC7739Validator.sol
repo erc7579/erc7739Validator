@@ -47,6 +47,16 @@ abstract contract ERC7739Validator {
             }
         }
 
+        // sig malleability prevention
+        bytes32 s;
+        assembly {
+            // same as `s := mload(add(signature, 0x40))` but for calldata
+            s := calldataload(add(signature.offset, 0x20))
+        }
+        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {
+            return 0xffffffff;
+        }
+
         bool success = _erc1271IsValidSignatureViaSafeCaller(sender, hash, signature)
             || _erc1271IsValidSignatureViaNestedEIP712(hash, signature)
             || _erc1271IsValidSignatureViaRPC(hash, signature);
