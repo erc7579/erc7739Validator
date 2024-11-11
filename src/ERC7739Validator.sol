@@ -20,7 +20,7 @@ abstract contract ERC7739Validator {
     /// @dev `keccak256("PersonalSign(bytes prefixed)")`.
     bytes32 internal constant _PERSONAL_SIGN_TYPEHASH = 0x983e65e5148e570cd828ead231ee759a8d7958721a768f93bc4483ba005c32de;
     bytes32 internal constant _DOMAIN_TYPEHASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
-    bytes4 internal constant SUPPORTS_ERC7739 = 0x77390001;
+    bytes4 internal constant SUPPORTS_ERC7739_V1 = 0x77390001;
 
     /*//////////////////////////////////////////////////////////////////////////
                                      INTERNAL
@@ -45,7 +45,7 @@ abstract contract ERC7739Validator {
             if (signature.length == uint256(0)) {
                 // Forces the compiler to optimize for smaller bytecode size.
                 if (uint256(hash) == ~signature.length / 0xffff * 0x7739) 
-                    return SUPPORTS_ERC7739;
+                    return SUPPORTS_ERC7739_V1;
             }
         }
 
