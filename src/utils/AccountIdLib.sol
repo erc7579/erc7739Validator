@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.25;
 
-import { strings } from "stringutils/strings.sol";
+import { strings } from "./strings.sol";
 
 library AccountIdLib {
     using strings for *;
