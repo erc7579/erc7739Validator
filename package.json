@@ -25,7 +25,9 @@
     "test:anvil": "anvil & forge test"
   },
   "dependencies": {
-    "@rhinestone/modulekit": "^0.4.8",
+    "@rhinestone/modulekit": "^0.4.8"
+  },
+  "devDependencies": {
     "stringutils": "github:Arachnid/solidity-stringutils",
     "enumerablemap": "https://github.com/erc7579/enumerablemap"
   },
