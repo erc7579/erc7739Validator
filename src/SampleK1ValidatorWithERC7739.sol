@@ -143,7 +143,7 @@ contract SampleK1ValidatorWithERC7739 is ERC7579ValidatorBase, ERC7739Validator 
     /// @param hash The hash of the data to validate
     /// @param sig The signature data
     /// @param data The data to validate against (owner address in this case)
-    function validateSignatureWithData(bytes32 hash, bytes calldata sig, bytes calldata data) external view returns (bool validSig) {
+    function validateSignatureWithData(bytes32 hash, bytes calldata sig, bytes calldata data) external view override returns (bool validSig) {
         require(data.length == 20, InvalidDataLength());
         address owner = address(bytes20(data[0:20]));
         return _validateSignatureForOwner(owner, hash, sig);

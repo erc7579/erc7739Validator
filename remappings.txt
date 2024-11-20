@@ -19,4 +19,4 @@ solarray/=node_modules/solarray/src/
 @prb/math/=node_modules/@prb/math/src/
 kernel/=node_modules/@zerodev/kernel/src/
 ExcessivelySafeCall/=node_modules/excessively-safe-call/src/
-enumerableset4337/=node_modules/enumerablemap/src/
+enumerableset4337/=node_modules/@erc7579/enumerablemap4337/src/

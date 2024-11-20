@@ -26,8 +26,8 @@
     "test:anvil": "anvil & forge test"
   },
   "dependencies": {
-    "@rhinestone/modulekit": "^0.4.8",
-    "enumerablemap": "https://github.com/erc7579/enumerablemap"
+    "@rhinestone/modulekit": "0.4.17",
+    "@erc7579/enumerablemap4337": "https://github.com/erc7579/enumerablemap"
   },
   "files": [
     "src",
